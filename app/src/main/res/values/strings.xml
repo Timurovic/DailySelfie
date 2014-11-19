@@ -3,5 +3,6 @@
 
     <string name="app_name">Daily Selfie</string>
     <string name="camera">Camera</string>
-
+    <string name="selfie">Selfie</string>
+    <string name="sometext">Some Text</string>
 </resources>
