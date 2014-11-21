@@ -29,7 +29,8 @@ public class MainActivity extends ListActivity {
 
     private SelfieViewAdapter mAdapter;
   //  Camera mCamera;
-    private ArrayList list;
+    ListView lv;
+
     File directory;
     String mCurrentPhotoPath;
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -41,9 +42,9 @@ public class MainActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        ListView lv =  getListView(); // (ListView) findViewById(R.id.listView);
+        lv =  (ListView) findViewById(android.R.id.list);
         View footerView = getLayoutInflater().inflate(R.layout.selfie_list, null);
-        lv.addFooterView(footerView);
+       // lv.addFooterView(footerView);
         mAdapter = new SelfieViewAdapter(getApplicationContext());
         setListAdapter(mAdapter);
 
@@ -178,10 +179,6 @@ public class MainActivity extends ListActivity {
                 startActivity(takePictureIntent);//, REQUEST_IMAGE_CAPTURE);
             }
         }
-    }
-
-    public ListView getListView() {
-        return listView;
     }
 /*
     @Override
