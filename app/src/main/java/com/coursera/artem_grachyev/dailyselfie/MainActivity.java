@@ -2,8 +2,14 @@ package com.coursera.artem_grachyev.dailyselfie;
 
 import android.app.Activity;
 import android.app.ListActivity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
@@ -197,5 +203,31 @@ public class MainActivity extends ListActivity {
     }
 */
 
+    protected void onStart(){
+        super.onStart();
+        Context context = getApplicationContext();
+        Intent notificationIntent = new Intent(context, MainActivity.class);
+
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
+                notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        Resources res = context.getResources();
+
+
+        Notification.Builder builder = new Notification.Builder(context)
+                .setContentTitle("Daily Selfie")
+                .setContentText("Time for another selfie")
+                .setTicker("Time for another selfie").setWhen(System.currentTimeMillis()) // java.lang.System.currentTimeMillis()
+                .setContentIntent(pendingIntent)
+                .setDefaults(Notification.DEFAULT_SOUND).setAutoCancel(true)
+                .setSmallIcon(android.R.drawable.ic_menu_camera);
+        //        .setLargeIcon(BitmapFactory.decodeResource(res, R.id.camera));
+
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.notify(101, builder.getNotification());
+    }
 
 }
