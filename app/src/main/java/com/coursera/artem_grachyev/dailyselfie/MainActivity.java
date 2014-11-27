@@ -1,6 +1,7 @@
 package com.coursera.artem_grachyev.dailyselfie;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.ListActivity;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -36,7 +37,8 @@ public class MainActivity extends ListActivity {
     private SelfieViewAdapter mAdapter;
   //  Camera mCamera;
     ListView lv;
-
+    private static final long REPEAT_ALARM_DELAY = 24 * 60 * 1000L;
+    private static final long REPEAT_ALARM_DELAY_test = 2 * 60 * 1000L;
     File directory;
     String mCurrentPhotoPath;
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -59,6 +61,8 @@ public class MainActivity extends ListActivity {
 
     //    setListAdapter(mAdapter);
         //mAdapter = get
+
+        setAlarm();
     }
 
 
@@ -202,19 +206,28 @@ public class MainActivity extends ListActivity {
         }
     }
 */
-
+/*
     protected void onStart(){
         super.onStart();
-        Context context = getApplicationContext();
-        Intent notificationIntent = new Intent(context, MainActivity.class);
 
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+    }
+*/
+
+    private void setAlarm() {
+        Context context = getApplicationContext();
+        Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+/*
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+*/
 
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
-                notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Resources res = context.getResources();
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis(), REPEAT_ALARM_DELAY_test, pendingIntent);
+        /*Resources res = context.getResources();
 
 
         Notification.Builder builder = new Notification.Builder(context)
@@ -228,6 +241,7 @@ public class MainActivity extends ListActivity {
 
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(101, builder.getNotification());
+        */
     }
 
 }
