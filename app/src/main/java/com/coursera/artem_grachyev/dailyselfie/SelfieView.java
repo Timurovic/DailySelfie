@@ -23,9 +23,10 @@ import java.util.Date;
 public class SelfieView extends Activity {
 
     ImageView ivPhoto;
-    TextView timeStampSelfie;
-    String mCurrentPhotoPath;
     static final int REQUEST_TAKE_PHOTO = 1;
+    ImageView mImageView;
+    String mText, mName;
+    Bitmap mBitmap;
     final String TAG = "DailySelfie";
 
     @Override
@@ -39,13 +40,29 @@ public class SelfieView extends Activity {
         Log.d("Files", "Path: " + path);
     }
 
-    public ImageView imageView()
+    SelfieView(Bitmap bm, String text, String name) {
+
+        this.mBitmap = bm;
+        this.mText = text;
+        this.mName = name;
+
+    }
+
+    public ImageView getImageView()
     {
-        return null;
+        return mImageView;
     }
 
 
-    public Bitmap getImage() {
-        return null;
+    public Bitmap getBitmap(){
+        return mBitmap;
+    }
+
+    String getText() {
+        return mText;
+    }
+
+    String getName() {
+        return mName;
     }
 }

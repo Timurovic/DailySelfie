@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 
@@ -37,8 +38,6 @@ public class MainActivity extends ListActivity {
     private SelfieViewAdapter mAdapter;
   //  Camera mCamera;
     ListView lv;
-    private static final long REPEAT_ALARM_DELAY = 24 * 60 * 1000L;
-    private static final long REPEAT_ALARM_DELAY_test = 2 * 60 * 1000L;
     File directory;
     String mCurrentPhotoPath;
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -50,8 +49,9 @@ public class MainActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+
         lv =  (ListView) findViewById(android.R.id.list);
-        View footerView = getLayoutInflater().inflate(R.layout.selfie_list, null);
+       // View footerView = getLayoutInflater().inflate(R.layout.selfie_list, null);
        // lv.addFooterView(footerView);
         mAdapter = new SelfieViewAdapter(getApplicationContext());
         setListAdapter(mAdapter);
@@ -61,6 +61,9 @@ public class MainActivity extends ListActivity {
 
     //    setListAdapter(mAdapter);
         //mAdapter = get
+
+
+
 
         setAlarm();
     }
@@ -215,18 +218,23 @@ public class MainActivity extends ListActivity {
 
     private void setAlarm() {
         Context context = getApplicationContext();
-        Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+        Intent intent = new Intent(context, AlarmReceiver.class);
 /*
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 */
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.add(Calendar.SECOND, 10);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
-                intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                getApplicationContext(), 1, intent, 0);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        /*alarmManager.set(AlarmManager.RTC_WAKEUP,
+                calendar.getTimeInMillis(), pendingIntent);*/
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis(), REPEAT_ALARM_DELAY_test, pendingIntent);
+                calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
         /*Resources res = context.getResources();
 
 

@@ -59,8 +59,8 @@ public class SelfieViewAdapter extends BaseAdapter {
             itemView = (ItemView) newView.getTag();
         }
 
-        itemView.mSelfieView.setImageBitmap(sv.getImage());
-    //    itemView.mDescriptionSelfieView.setText(sv.getCountryName());
+        itemView.mSelfieView.setImageBitmap(sv.getBitmap());
+        itemView.mDescriptionSelfieView.setText(sv.getName());
 
         return newView;
 

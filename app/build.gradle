@@ -6,6 +6,7 @@ android {
     defaultConfig {
         applicationId "com.coursera.artem_grachyev.dailyselfie"
         minSdkVersion 14
+        maxSdkVersion 20
         targetSdkVersion 18
         versionCode 1
         versionName "1.0"
@@ -22,4 +23,5 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:support-v4:20.0.0'
 }
