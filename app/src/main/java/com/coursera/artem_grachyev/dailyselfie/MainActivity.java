@@ -15,11 +15,13 @@ import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -36,34 +38,48 @@ import java.util.Date;
 public class MainActivity extends ListActivity {
 
     private SelfieViewAdapter mAdapter;
-  //  Camera mCamera;
-    ListView lv;
+    //  Camera mCamera;
+    //  ListView lv;
     File directory;
-    String mCurrentPhotoPath;
+    String mCurrentPhotoPath, imageFileName, mFileName;
     static final int REQUEST_IMAGE_CAPTURE = 1;
-  //  static final int REQUEST_TAKE_PHOTO = 1;
+    private static final long INITIAL_ALARM_DELAY_TWO_MINUTES = 2 * 60 * 1000L;
+
+    //  static final int REQUEST_TAKE_PHOTO = 1;
     final String TAG = "DailySelfie";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        //    setContentView(R.layout.main);
 
 
-        lv =  (ListView) findViewById(android.R.id.list);
-       // View footerView = getLayoutInflater().inflate(R.layout.selfie_list, null);
-       // lv.addFooterView(footerView);
+
+        ListView lv = getListView();
+
+        View footerView = getLayoutInflater().inflate(R.layout.main, null, false);
+
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                SelfieView selfieView = (SelfieView) mAdapter.getItem(position);
+                Bitmap bitmap = selfieView.getBitmap();
+                String fileName = selfieView.getName();
+
+                Intent intentSelfie = new Intent(MainActivity.this, SelfieActivity.class);
+                intentSelfie.putExtra("bitmap", bitmap);
+                intentSelfie.putExtra("fileName", fileName);
+
+                startActivity(intentSelfie);
+            }
+            
+        });
+
+        lv.addFooterView(footerView);
         mAdapter = new SelfieViewAdapter(getApplicationContext());
+        mAdapter.addAllViews();
         setListAdapter(mAdapter);
-
-      //  placesListView.addFooterView(R.layout.list);
-    //    mAdapter = new ArrayAdapter<String>(this, R.layout.selfie_list);
-
-    //    setListAdapter(mAdapter);
-        //mAdapter = get
-
-
-
 
         setAlarm();
     }
@@ -108,7 +124,7 @@ public class MainActivity extends ListActivity {
     @Override
     protected void onPause() {
         super.onPause();
-   //     releaseMediaRecorder();
+        //     releaseMediaRecorder();
    /*     if (mCamera != null)
             mCamera.release();
         mCamera = null;*/
@@ -138,22 +154,12 @@ public class MainActivity extends ListActivity {
         }
     }
 */
-    private Uri generateFileUri() {
-        File file = null;
-        file = new File(directory.getPath() + "/" + "Pictures/DailySelfie/"
-            + System.currentTimeMillis() + ".jpg");
 
-        Log.d(TAG, "fileName = " + file);
-        return Uri.fromFile(file);
-    }
 
     private File createImageFile() throws IOException {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = timeStamp;
-
-        Log.d(TAG, timeStamp);
-        Log.d(TAG, imageFileName);
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date().getTime());
+        imageFileName = timeStamp;
 
         String storage = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES) + "/DailySelfie/" ;
@@ -162,14 +168,19 @@ public class MainActivity extends ListActivity {
         if (!storageDir.exists()) {
             storageDir.mkdirs();
         }
+        /*
         File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
+                imageFileName,
+                ".jpg",
+                storageDir
         );
-     //   Log.d(TAG, image.getAbsolutePath());
+        */
+
+        File image = new File(storageDir.getAbsolutePath() + File.separator + imageFileName + ".jpg");
+
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        mFileName = image.getAbsolutePath();
         return image;
     }
 
@@ -184,72 +195,74 @@ public class MainActivity extends ListActivity {
             } catch (IOException ex) {
                 // Error occurred while creating the File
                 Log.d(TAG, ex.getMessage());
+                Log.d(TAG, "IOException");
             }
+
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        Uri.fromFile(photoFile));
-                startActivity(takePictureIntent);//, REQUEST_IMAGE_CAPTURE);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         }
     }
-/*
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE) {
-            if (resultCode == RESULT_OK) {
-                if (data == null) {
-                    Log.d(TAG, "Intent is null");
-                } else {
-                    Bundle extras = data.getExtras();
-                    Bitmap imageBitmap = (Bitmap) extras.get("data");
-                  //  mSelfieView.setImageBitmap(imageBitmap);
-                }
-            }
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            galleryAddPic();
+            Bitmap imageBitmapT = setPic();
+
+            SelfieView selfieView = new SelfieView();
+            selfieView.setName(imageFileName);
+
+            selfieView.setBitmap(imageBitmapT);
+
+            mAdapter.add(selfieView);
+
+            Log.i(TAG, "exit onActivityResult");
         }
     }
-*/
-/*
-    protected void onStart(){
-        super.onStart();
 
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
     }
-*/
+
+    private Bitmap setPic(){
+
+
+
+        int scaleFactor = 5;
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(mFileName, bmOptions);
+
+        return bitmap;
+    }
 
     private void setAlarm() {
         Context context = getApplicationContext();
         Intent intent = new Intent(context, AlarmReceiver.class);
-/*
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-*/
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.add(Calendar.SECOND, 10);
+        // calendar.add(Calendar.SECOND, 10);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 getApplicationContext(), 1, intent, 0);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        /*alarmManager.set(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(), pendingIntent);*/
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-        /*Resources res = context.getResources();
+                calendar.getTimeInMillis() + INITIAL_ALARM_DELAY_TWO_MINUTES, INITIAL_ALARM_DELAY_TWO_MINUTES, pendingIntent);
 
-
-        Notification.Builder builder = new Notification.Builder(context)
-                .setContentTitle("Daily Selfie")
-                .setContentText("Time for another selfie")
-                .setTicker("Time for another selfie").setWhen(System.currentTimeMillis()) // java.lang.System.currentTimeMillis()
-                .setContentIntent(pendingIntent)
-                .setDefaults(Notification.DEFAULT_SOUND).setAutoCancel(true)
-                .setSmallIcon(android.R.drawable.ic_menu_camera);
-        //        .setLargeIcon(BitmapFactory.decodeResource(res, R.id.camera));
-
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(101, builder.getNotification());
-        */
     }
 
 }

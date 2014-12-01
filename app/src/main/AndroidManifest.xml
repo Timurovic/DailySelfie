@@ -7,7 +7,8 @@
         android:required="true"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="18"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+
 
     <application
         android:allowBackup="true"
@@ -24,13 +25,9 @@
             </intent-filter>
 
         </activity>
-        <receiver android:name=".AlarmReceiver"
-            android:enabled="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
-            </intent-filter>
-        </receiver>
+        <activity android:name=".SelfieActivity" />
         <receiver android:name=".AlarmReceiver" android:process=":remote" />
+
     </application>
 
 </manifest>
